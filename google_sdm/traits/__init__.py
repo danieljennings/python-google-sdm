@@ -23,3 +23,7 @@ from .camera import (
     CameraPersonTrait,
     CameraSoundTrait,
 )
+
+from .doorbell import (
+    DoorbellChimeTrait,
+)

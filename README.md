@@ -2,8 +2,7 @@
 
 ## Rough TODO
 
-- Methods for Doorbell
-- Ability to get parent Structure from device object
+- Ability to get parent SDMStructure/Room from SDMDevice object
 - Tests
 - Finish this readme with docs on setup
 - Home Assistant integration (in testing) after this API completes
