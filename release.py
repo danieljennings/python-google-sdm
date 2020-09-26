@@ -17,12 +17,12 @@ def rmrf(folder):
                 shutil.rmtree(file_path)
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
+    shutil.rmtree(folder)
 
 
 if __name__ == "__main__":
-    rmrf('build')
-    rmrf('dist')
-    rmrf('google_sdm.egg-info')
+    for p in ['build', 'dist', 'google_sdm.egg-info']:
+        rmrf(p) if path.exists(p) else None
 
     with open("version", "r") as fh:
         version_str = fh.read()
