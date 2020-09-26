@@ -54,6 +54,7 @@ class SDMAPI(object):
         redirect_uri: str = None,
         pubsub_subscription: str = None,
         pubsub_auth_path: str = None,
+        pubsub_auth: Optional = None,
         token_updater: Optional[Callable[[str], None]] = None,
     ):
         self.project_id = project_id
@@ -65,6 +66,7 @@ class SDMAPI(object):
         self.token = token
         self._pubsub_subscription = pubsub_subscription
         self._pubsub_auth_path = pubsub_auth_path
+        self._pubsub_auth = pubsub_auth
         self._devices = []
         self._structures = []
         self._event_thread = None
@@ -86,9 +88,16 @@ class SDMAPI(object):
 
     def listen_events(self):
         if self._event_thread is None:
-            subscriber = pubsub_v1.SubscriberClient.from_service_account_file(
-                self._pubsub_auth_path
-            )
+            subscriber = None
+            if self._pubsub_auth_path is not None:
+                subscriber = \
+                    pubsub_v1.SubscriberClient.from_service_account_file(
+                        self._pubsub_auth_path
+                    )
+            else:
+                subscriber = pubsub_v1.SubscriberClient(
+                    credentials=self._pubsub_auth
+                )
 
             def generate_callback():
                 if not self._devices:
