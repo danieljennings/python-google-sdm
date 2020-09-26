@@ -27,3 +27,8 @@ from .camera import (
 from .doorbell import (
     DoorbellChimeTrait,
 )
+
+from .structure import (
+    StructureInfoTrait,
+    StructureRoomInfoTrait,
+)

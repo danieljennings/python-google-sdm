@@ -12,6 +12,10 @@ from .devices import (
     SDMThermostat,
 )
 
+from .structure import (
+    SDMStructure,
+)
+
 from oauthlib.oauth2 import TokenExpiredError
 from requests import Response
 from requests_oauthlib import OAuth2Session
@@ -205,7 +209,7 @@ class SDMAPI(object):
                     )
         return self._devices
 
-    def get_structures(self, refresh=False):
+    def get_structures(self, refresh=False) -> List[SDMStructure]:
         """Return a list of `SDMStructure` instances for all
         structures."""
         if not self._structures or refresh:
@@ -282,87 +286,3 @@ class SDM(SDMAPI):
             client_secret=self.client_secret,
         )
         self.token_dump(token)
-
-
-class SDMObject:
-    pass
-
-
-class SDMStructure:
-    """Class representing a single SDM structure."""
-
-    def __init__(
-        self,
-        api,
-        name,
-        traits=None,
-    ):
-        self.api = api
-        self.name = name
-        self.traits = traits or {}
-
-    def __repr__(self):
-        rep = "SDMStructure("
-        rep += "api, name='{}', traits='{}'"
-        rep += ")"
-
-        return rep.format(
-            self.name,
-            self.traits,
-        )
-
-    @staticmethod
-    def json2dict(lst):
-        """Turn a list of dictionaries where one key is called 'key'
-        into a dictionary with the value of 'key' as key."""
-        return {d.pop("key"): d for d in lst}
-
-    def _get(self, endpoint):
-        """Get data (as dictionary) from an endpoint."""
-        return self.api._get(f"{self.name}{endpoint}")
-
-    def get_rooms(self):
-        """Get structure rooms."""
-        data = self._get("/rooms")
-        return [SDMStructure.Room(self.api, **app) for app in data["rooms"]]
-
-    def update(self):
-        """Return this structure with updated data."""
-        return SDMStructure(self, **self._get(""))
-
-    class Room:
-        """Class representing a single SDM structure's room."""
-
-        def __init__(
-            self,
-            api,
-            name,
-            traits=None,
-        ):
-            self.api = api
-            self.name = name
-            self.traits = traits or {}
-
-        def __repr__(self):
-            rep = "SDMStructure.Room("
-            rep += "api, name='{}', traits='{}'"
-            rep += ")"
-
-            return rep.format(
-                self.name,
-                self.traits,
-            )
-
-        @staticmethod
-        def json2dict(lst):
-            """Turn a list of dictionaries where one key is called 'key'
-            into a dictionary with the value of 'key' as key."""
-            return {d.pop("key"): d for d in lst}
-
-        def _get(self, endpoint):
-            """Get data (as dictionary) from an endpoint."""
-            return self.api._get(f"{self.name}{endpoint}")
-
-        def update(self):
-            """Get active programs."""
-            return SDMStructure.Room(self, **self._get(""))
