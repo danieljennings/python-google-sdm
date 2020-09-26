@@ -29,7 +29,7 @@ class CameraImageTrait(Trait):
 
     def __init__(self, trait_dict):
         props = {
-            "_max_image_resolution": "maxImageResolution",
+            "max_image_resolution": "maxImageResolution",
         }
         super().__init__(self, props, trait_dict)
 
@@ -50,9 +50,9 @@ class CameraLiveStreamTrait(Trait):
 
     def __init__(self, trait_dict):
         props = {
-            "_max_video_resolution": "maxVideoResolution",
-            "_video_codecs": "videoCodecs",
-            "_audio_codecs": "audioCodecs",
+            "max_video_resolution": "maxVideoResolution",
+            "video_codecs": "videoCodecs",
+            "audio_codecs": "audioCodecs",
         }
         super().__init__(self, props, trait_dict)
 

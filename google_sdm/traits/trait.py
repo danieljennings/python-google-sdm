@@ -10,10 +10,6 @@ class Trait(ABC):
         for key in props.keys():
             if props[key] in trait_dict:
                 setattr(subself, key, trait_dict[props[key]])
-
-                def getter():
-                    return getattr(subself, key)
-                setattr(subself, key[1::], getter)
             else:
                 setattr(subself, key, None)
 

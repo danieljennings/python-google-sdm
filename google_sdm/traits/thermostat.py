@@ -50,8 +50,8 @@ class ThermostatModeTrait(Trait):
 
     def __init__(self, trait_dict):
         props = {
-            "_available_modes": "availableModes",
-            "_mode": "mode",
+            "available_modes": "availableModes",
+            "mode": "mode",
         }
         super().__init__(self, props, trait_dict)
 
@@ -84,8 +84,8 @@ class ThermostatTemperatureSetpointTrait(Trait):
 
     def __init__(self, trait_dict):
         props = {
-            "_heat_celsius": "heatCelsius",
-            "_cool_celsius": "coolCelsius",
+            "heat_celsius": "heatCelsius",
+            "cool_celsius": "coolCelsius",
         }
         super().__init__(self, props, trait_dict)
 

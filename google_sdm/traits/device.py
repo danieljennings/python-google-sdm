@@ -7,7 +7,7 @@ class DeviceInfoTrait(Trait):
         return "sdm.devices.traits.Info"
 
     def __init__(self, trait_dict):
-        props = {"_custom_name": "customName"}
+        props = {"custom_name": "customName"}
         super().__init__(self, props, trait_dict)
 
 
@@ -17,7 +17,7 @@ class DeviceConnectivityTrait(Trait):
         return "sdm.devices.traits.Connectivity"
 
     def __init__(self, trait_dict):
-        props = {"_status": "status"}
+        props = {"status": "status"}
         super().__init__(self, props, trait_dict)
 
 
@@ -32,8 +32,8 @@ class DeviceFanTrait(Trait):
 
     def __init__(self, trait_dict):
         props = {
-            "_timer_mode": "timerMode",
-            "_timer_timeout": "timerTimeout",
+            "timer_mode": "timerMode",
+            "timer_timeout": "timerTimeout",
         }
         super().__init__(self, props, trait_dict)
 
@@ -54,7 +54,7 @@ class DeviceHumidityTrait(Trait):
         return "sdm.devices.traits.Humidity"
 
     def __init__(self, trait_dict):
-        props = {"_ambient_humidity_percent": "ambientHumidityPercent"}
+        props = {"ambient_humidity_percent": "ambientHumidityPercent"}
         super().__init__(self, props, trait_dict)
 
 
@@ -64,7 +64,7 @@ class DeviceSettingsTrait(Trait):
         return "sdm.devices.traits.Settings"
 
     def __init__(self, trait_dict):
-        props = {"_temperature_scale": "temperatureScale"}
+        props = {"temperature_scale": "temperatureScale"}
         super().__init__(self, props, trait_dict)
 
 
@@ -74,5 +74,5 @@ class DeviceTemperatureTrait(Trait):
         return "sdm.devices.traits.Temperature"
 
     def __init__(self, trait_dict):
-        props = {"_ambient_temperature_celsius": "ambientTemperatureCelsius"}
+        props = {"ambient_temperature_celsius": "ambientTemperatureCelsius"}
         super().__init__(self, props, trait_dict)
