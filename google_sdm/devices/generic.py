@@ -1,7 +1,11 @@
+from abc import ABC
+from datetime import timezone, datetime
+
 from ..traits import SDMTraitGetter, DeviceInfoTrait
+from ..utils import deep_merge
 
 
-class SDMDevice():
+class SDMDevice(ABC):
     """Class representing a single SDM device."""
 
     def __init__(
@@ -22,6 +26,9 @@ class SDMDevice():
         self.name = name or ""
         self.connected = connected
         self.status = {}
+        self.last_updated = datetime.now(tz=timezone.utc)
+        self._update_listeners = []
+        self._event_listeners = []
 
     def __repr__(self):
         rep = "SDMDevice("
@@ -53,8 +60,36 @@ class SDMDevice():
             {"command": command, "params": params},
         )
 
+    def register_update_listener(self, update_listener):
+        self._update_listeners.append(update_listener)
+
+    def register_event_listener(self, event_listener):
+        self._event_listeners.append(event_listener)
+
     @SDMTraitGetter(DeviceInfoTrait)
     def get_info(self, **kwargs):
         if "trait" not in kwargs:
             return None
         return kwargs["trait"]
+
+    def event_callback(self, message):
+        timestamp = datetime.strptime(
+            message["timestamp"],
+            '%Y-%m-%dT%H:%M:%S.%f%z'
+        )
+        if timestamp > self.last_updated:
+            self.last_updated = timestamp
+            if "events" in message["resourceUpdate"]:
+                for event_listener in self._event_listeners:
+                    event_listener(message["resourceUpdate"]["events"])
+            elif "traits" in message["resourceUpdate"]:
+                self.traits = deep_merge(
+                    self.traits,
+                    message["resourceUpdate"]["traits"]
+                )
+                for update_listener in self._update_listeners:
+                    update_listener(message["resourceUpdate"]["traits"])
+            else:
+                raise Exception(
+                    f"Unable to handle event for device {self.name}"
+                )

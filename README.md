@@ -2,7 +2,6 @@
 
 ## Rough TODO
 
-- Implement cloud poll updates from pubsub
 - Methods for Doorbell, Display, Camera
 - Events API for Doorbell, Display, Camera
 - Ability to get parent Structure from device object

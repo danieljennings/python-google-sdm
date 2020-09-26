@@ -2,7 +2,6 @@ import json
 import logging
 import os
 import time
-import threading
 from typing import Callable, Dict, Optional, Union, List
 
 from .devices import (
@@ -16,7 +15,7 @@ from .devices import (
 from oauthlib.oauth2 import TokenExpiredError
 from requests import Response
 from requests_oauthlib import OAuth2Session
-# from google.cloud import pubsub_v1
+from google.cloud import pubsub_v1
 
 API_URL = "https://smartdevicemanagement.googleapis.com/v1/"
 OAUTH2_AUTHORIZE_TEMPLATE = \
@@ -49,6 +48,8 @@ class SDMAPI(object):
         client_id: str = None,
         client_secret: str = None,
         redirect_uri: str = None,
+        pubsub_subscription: str = None,
+        pubsub_auth_path: str = None,
         token_updater: Optional[Callable[[str], None]] = None,
     ):
         self.project_id = project_id
@@ -58,8 +59,11 @@ class SDMAPI(object):
         self.redirect_uri = redirect_uri
         self.token_updater = token_updater
         self.token = token
+        self._pubsub_subscription = pubsub_subscription
+        self._pubsub_auth_path = pubsub_auth_path
+        self._devices = []
+        self._structures = []
         self._event_thread = None
-        self._update_event = threading.Event()
 
         extra = {
             "client_id": self.client_id,
@@ -76,17 +80,63 @@ class SDMAPI(object):
             scope=OAUTH2_SCOPE,
         )
 
-    @property
-    def update_event(self):
-        return self._update_event
+    def listen_events(self):
+        if self._event_thread is None:
+            subscriber = pubsub_v1.SubscriberClient.from_service_account_file(
+                self._pubsub_auth_path
+            )
 
-    def start_polling(self, callback):
-        pass
-        # sub_id = "projects/personalnginx/subscriptions/nest-sdm-events"
-        # subscriber = pubsub_v1.SubscriberClient.from_service_account_file(
-        #     '/home/reddragon/Downloads/PersonalNginx-b73893284eb5.json'
-        # )
-        # self._event_thread = subscriber.subscribe(sub_id, callback)
+            def generate_callback():
+                if not self._devices:
+                    self.get_devices()
+                if not self._structures:
+                    self.get_structures()
+
+                def handle_message(message):
+                    msg = json.loads(message.data.decode())
+                    event_id = msg["eventId"]
+                    LOGGER.info(f"Received pubsub message: {event_id}")
+                    LOGGER.debug(f"Received pubsub message: {msg}")
+                    relevant_device = None
+                    if "relationUpdate" in msg:
+                        LOGGER.debug(
+                            "Relation update, updating devices and structures"
+                        )
+                        self.get_devices(refresh=True)
+                        self.get_structures(refresh=True)
+                    elif "resourceUpdate" in msg:
+                        for device in self._devices:
+                            if msg["resourceUpdate"]["name"] == device.name:
+                                relevant_device = device
+                        if not relevant_device:
+                            LOGGER.error(
+                                f"Nacking pubsub message: {event_id}: "
+                                + "No relevant device"
+                            )
+                            message.nack()
+                            return
+                        try:
+                            relevant_device.event_callback(msg)
+                            LOGGER.debug(f"Acking pubsub message: {event_id}")
+                            message.ack()
+                        except Exception as e:
+                            LOGGER.error(
+                                f"Nacking pubsub message: {event_id}: "
+                                + f"{e}"
+                            )
+                            message.nack()
+                    else:
+                        LOGGER.error(
+                            f"Nacking pubsub message: {event_id}: "
+                            + "No processable events"
+                        )
+                        message.nack()
+                return handle_message
+
+            self._event_thread = subscriber.subscribe(
+                self._pubsub_subscription,
+                generate_callback()
+            )
 
     def refresh_tokens(self) -> Dict[str, Union[str, int]]:
         """Refresh and return new tokens."""
@@ -143,23 +193,28 @@ class SDMAPI(object):
                 raise SDMError(res["error"])
         return res
 
-    def get_devices(self) -> List[SDMDevice]:
+    def get_devices(self, refresh=False) -> List[SDMDevice]:
         """Return a list of `SDMDevice` instances for all
         devices."""
-        devices = []
-        data = self._get(ENDPOINT_DEVICES.format(self.project_id))
-        for device in data["devices"]:
-            if device["type"] in self.DEVICE_TYPES:
-                devices.append(
-                    self.DEVICE_TYPES[device["type"]](self, **device)
-                )
-        return devices
+        if not self._devices or refresh:
+            data = self._get(ENDPOINT_DEVICES.format(self.project_id))
+            for device in data["devices"]:
+                if device["type"] in self.DEVICE_TYPES:
+                    self._devices.append(
+                        self.DEVICE_TYPES[device["type"]](self, **device)
+                    )
+        return self._devices
 
-    def get_structures(self):
+    def get_structures(self, refresh=False):
         """Return a list of `SDMStructure` instances for all
         structures."""
-        data = self._get(ENDPOINT_STRUCTURES.format(self.project_id))
-        return [SDMStructure(self, **app) for app in data["structures"]]
+        if not self._structures or refresh:
+            data = self._get(ENDPOINT_STRUCTURES.format(self.project_id))
+            for structure in data["structures"]:
+                self._structures.append(
+                    SDMStructure(self, **structure)
+                )
+        return self._structures
 
     def get_authurl(self):
         """Get the URL needed for the authorization code grant flow."""
@@ -179,6 +234,8 @@ class SDM(SDMAPI):
                  client_id,
                  client_secret="",
                  redirect_uri="",
+                 pubsub_subscription="",
+                 pubsub_auth_path="",
                  token_cache=None):
         """Initialize the connection."""
         self.token_cache = token_cache or "google-sdm_oauth_token.json"
@@ -189,6 +246,8 @@ class SDM(SDMAPI):
             client_id,
             client_secret,
             redirect_uri,
+            pubsub_subscription,
+            pubsub_auth_path,
             self.token_dump
         )
 
