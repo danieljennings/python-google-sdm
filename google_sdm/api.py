@@ -20,6 +20,7 @@ from oauthlib.oauth2 import TokenExpiredError
 from requests import Response
 from requests_oauthlib import OAuth2Session
 from google.cloud import pubsub_v1
+from google.oauth2 import service_account
 
 API_URL = "https://smartdevicemanagement.googleapis.com/v1/"
 OAUTH2_AUTHORIZE_TEMPLATE = \
@@ -96,7 +97,7 @@ class SDMAPI(object):
                     )
             else:
                 subscriber = pubsub_v1.SubscriberClient(
-                    credentials=self._pubsub_auth
+                    credentials=service_account.Credentials.from_service_account_info(self._pubsub_auth)
                 )
 
             def generate_callback():
