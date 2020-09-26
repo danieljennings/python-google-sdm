@@ -12,10 +12,10 @@ class ThermostatEcoTrait(Trait):
 
     def __init__(self, trait_dict):
         props = {
-            "_available_modes": "availableModes",
-            "_mode": "mode",
-            "_heat_celsius": "heatCelsius",
-            "_cool_celsius": "coolCelsius",
+            "available_modes": "availableModes",
+            "mode": "mode",
+            "heat_celsius": "heatCelsius",
+            "cool_celsius": "coolCelsius",
         }
         super().__init__(self, props, trait_dict)
 
@@ -35,7 +35,7 @@ class ThermostatHvacTrait(Trait):
         return "sdm.devices.traits.ThermostatHvac"
 
     def __init__(self, trait_dict):
-        props = {"_status": "status"}
+        props = {"status": "status"}
         super().__init__(self, props, trait_dict)
 
 
