@@ -42,7 +42,7 @@ class DeviceFanTrait(Trait):
 
     @staticmethod
     def SetTimer(device, timer_mode: str, duration_seconds: int):
-        device.execute_command(DeviceFanTrait.COMMANDS["SetTimer"], {
+        return device.execute_command(DeviceFanTrait.COMMANDS["SetTimer"], {
             "timerMode": timer_mode,
             "duration": f"{duration_seconds}s"
         })

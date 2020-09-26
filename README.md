@@ -2,8 +2,7 @@
 
 ## Rough TODO
 
-- Methods for Doorbell, Display, Camera
-- Events API for Doorbell, Display, Camera
+- Methods for Doorbell, Display
 - Ability to get parent Structure from device object
 - Tests
 - Finish this readme with docs on setup

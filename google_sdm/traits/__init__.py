@@ -14,3 +14,12 @@ from .thermostat import (
     ThermostatModeTrait,
     ThermostatTemperatureSetpointTrait,
 )
+
+from .camera import (
+    CameraEventImageTrait,
+    CameraImageTrait,
+    CameraLiveStreamTrait,
+    CameraMotionTrait,
+    CameraPersonTrait,
+    CameraSoundTrait,
+)

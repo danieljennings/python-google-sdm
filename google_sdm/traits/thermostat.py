@@ -24,7 +24,7 @@ class ThermostatEcoTrait(Trait):
 
     @staticmethod
     def SetMode(device, mode: str):
-        device.execute_command(ThermostatEcoTrait.COMMANDS["SetMode"], {
+        return device.execute_command(ThermostatEcoTrait.COMMANDS["SetMode"], {
             "mode": mode,
         })
 
@@ -62,9 +62,10 @@ class ThermostatModeTrait(Trait):
 
     @staticmethod
     def SetMode(device, mode: str):
-        device.execute_command(ThermostatModeTrait.COMMANDS["SetMode"], {
-            "mode": mode,
-        })
+        return device.execute_command(
+            ThermostatModeTrait.COMMANDS["SetMode"],
+            {"mode": mode}
+        )
 
 
 class ThermostatTemperatureSetpointTrait(Trait):
@@ -90,21 +91,21 @@ class ThermostatTemperatureSetpointTrait(Trait):
 
     @staticmethod
     def SetHeat(device, heat_celsius: float):
-        device.execute_command(
+        return device.execute_command(
             ThermostatTemperatureSetpointTrait.COMMANDS["SetHeat"], {
                 "heatCelsius": heat_celsius,
             })
 
     @staticmethod
     def SetCool(device, cool_celsius: float):
-        device.execute_command(
+        return device.execute_command(
             ThermostatTemperatureSetpointTrait.COMMANDS["SetCool"], {
                 "coolCelsius": cool_celsius,
             })
 
     @staticmethod
     def SetRange(device, cool_celsius: float, heat_celsius: float):
-        device.execute_command(
+        return device.execute_command(
             ThermostatTemperatureSetpointTrait.COMMANDS["SetRange"], {
                 "coolCelsius": cool_celsius,
                 "heatCelsius": heat_celsius,
