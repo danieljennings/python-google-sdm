@@ -2,7 +2,7 @@
 
 ## Rough TODO
 
-- Methods for Doorbell, Display
+- Methods for Doorbell
 - Ability to get parent Structure from device object
 - Tests
 - Finish this readme with docs on setup
